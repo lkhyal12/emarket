@@ -1,4 +1,4 @@
-import UserModel from "../models/UserModel";
+import UserModel from "../models/UserModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 export async function signUpController(req, res) {
@@ -86,4 +86,14 @@ export async function logoutController(req, res) {
     sameSite: "strict",
   });
   return res.status(200).json({ message: "logged successfully" });
+}
+
+// get profile controller
+export function getProfile(req, res) {
+  const user = req.user;
+  if (!user) return res.status(404).json({ message: "User not found" });
+  const { password: _, ...safeUser } = user.toObject();
+  return res
+    .status(200)
+    .json({ message: "User sent successfully", user: safeUser });
 }
