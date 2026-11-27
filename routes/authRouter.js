@@ -3,6 +3,7 @@ import {
   getProfile,
   loginController,
   logoutController,
+  refreshController,
   signUpController,
 } from "../controllers/authControllers.js";
 import { protectedRoute } from "../middleware/protectedRoute.js";
@@ -12,4 +13,5 @@ authRouter.post("/sign-up", signUpController);
 authRouter.post("/login", loginController);
 authRouter.post("/logout", logoutController);
 authRouter.get("/profile", protectedRoute, getProfile);
+authRouter.post("/refresh", refreshController);
 export default authRouter;

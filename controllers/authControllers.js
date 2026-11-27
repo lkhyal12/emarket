@@ -97,3 +97,42 @@ export function getProfile(req, res) {
     .status(200)
     .json({ message: "User sent successfully", user: safeUser });
 }
+
+// refresh controller
+export async function refreshController(req, res) {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken)
+    return res
+      .status(401)
+      .json({ message: "Unauthorized: Missing refreshToken" });
+  try {
+    const { userId } = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET,
+    );
+    const user = await UserModel.findById(userId).select("-password");
+    if (!user)
+      return res.status(401).json({ message: "Unauthorized: User not found" });
+    const newAccessToken = jwt.sign(
+      { userId: user._id },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "15m" },
+    );
+
+    return res.status(200).json({
+      message: "New accessToken was issued",
+      accessToken: newAccessToken,
+    });
+  } catch (err) {
+    console.log("error in the refreshController ", err);
+    if (
+      err.name === "TokenExpiredError" ||
+      err.name === "JsonWebTokenError" ||
+      err.name === "NotBeforeError"
+    )
+      return res
+        .status(401)
+        .json({ message: "Invalid or expired refreshToken" });
+  }
+  return res.status(500).json({ message: "Server error" });
+}
